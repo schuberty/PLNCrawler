@@ -13,7 +13,7 @@ header = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko
 
 """## General functions"""
 
-def getLastPage(url, htmlClass, rawString, delStart, delEnd):
+def getLastPage(url, htmlClass, rawString, rmStart, rmEnd):
   findLastPage = re.compile(rawString)
 
   url = url + '1'
@@ -21,12 +21,13 @@ def getLastPage(url, htmlClass, rawString, delStart, delEnd):
   bs = BeautifulSoup(html.text, "html.parser")
   lastPage = str(bs.find_all("a", class_=htmlClass))
   for page in findLastPage.finditer(lastPage):
-    page = int(lastPage[page.start()+delStart:page.end()-delEnd])
+    page = int(lastPage[page.start()+rmStart:page.end()-rmEnd])
 
   return page
 
 def getRequests(url, lastPage):
   htmls = []
+  
   for pageNum in range(1, lastPage+1):
     pageUrl = url + str(pageNum)
     html = requests.get(pageUrl, headers=header)
@@ -34,13 +35,23 @@ def getRequests(url, lastPage):
   
   return htmls
 
+def getRawData(htmls, htmlClass, rawString):
+  findAnchor = re.compile(rawString)
+  rawData = []
+
+  for html in htmls:
+    bs = BeautifulSoup(html.text, "html.parser")
+    div = str(bs.find_all("div", class_=htmlClass))
+    for anc in findAnchor.finditer(div):
+      rawData.append(div[anc.start():anc.end()])
+  
+  return rawData
+
 """## Sensacionalista crawler
 Otimizar
 """
 
 # def getSensacionalistaData(sarcastic=True):
-  # findAnchor = re.compile(r"<a[^<]*</a>")
-  # findTitle = re.compile(r"title=\"[^\"]*")
   # findLink = re.compile(r"href=\"[^\"]*")
 
   url = "https://www.sensacionalista.com.br/pais/page/"
@@ -52,14 +63,8 @@ Otimizar
   htmls = getRequests(url, lastPage)
   print("[1]All {0} pages requested successful".format(len(htmls)))
   
-  # # Search trough all the pages and crawl the data
-  # rawData = []
-  # for html in htmls:
-  #   bs = BeautifulSoup(html.text, "html.parser")
-  #   div = str(bs.find_all("div", class_="td_module_8 td_module_wrap"))
-  #   for anc in findAnchor.finditer(div):
-  #     rawData.append(div[anc.start():anc.end()])
-  # print("[2]Amount of {0} raw data".format(len(rawData)))
+  rawData = getRawData(htmls, "td_module_8 td_module_wrap", r"<a[^<]*</a>")
+  print("[2]Amount of {0} raw data".format(len(rawData)))
 
   # # Format the data to a dataframe
   # crawler = pd.DataFrame(columns=['article_link','headline','is_sarcastic'])
@@ -131,8 +136,7 @@ crawler
 rawData
 
 """## HuffPost Brasil crawler
-Há fazer
-https://www.huffpostbrasil.com/noticias/
+Otimizando
 """
 
 # def getHuffPostBrasilData(sarcastic=False):
@@ -144,21 +148,8 @@ print("[0]Total of {0} pages to crawl".format(lastPage))
 htmls = getRequests(url, lastPage)
 print("[1]All {0} pages requested successful".format(len(htmls)))
 
-findAnchor = re.compile(r"<a class=\"[^<]*</a>")
-
-rawData = []
-for html in htmls:
-  bs = BeautifulSoup(html.text, "html.parser")
-  div = str(bs.find_all("div", class_="apage-rail-cards"))
-  for anc in findAnchor.finditer(div):
-    rawData.append(div[anc.start():anc.end()])
+rawData = getRawData(htmls, "apage-rail-cards", r"<a class=\"[^<]*</a>")
 print("[2]Amount of {0} raw data".format(len(rawData)))
-
-def getRawData(htmls, htmlClass):
-  rawData = []
-  for html in htmls:
-    bs = BeautifulSoup(html.text, "html.parser")
-    div = str(bs.find_all("div", class_=htmlClass))
 
 findLink = re.compile(r"href=\"[^\"]*\"")
 findTitle = re.compile(r"target=\"_self\">[^<]*<")
