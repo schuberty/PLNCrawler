@@ -47,16 +47,11 @@ def getRawData(htmls, htmlClass, rawString):
   
   return rawData
 
-"""## Sensacionalista crawler
-Otimizar
-"""
+"""## Sensacionalista crawler"""
 
-# def getSensacionalistaData(sarcastic=True):
-  # findLink = re.compile(r"href=\"[^\"]*")
-
+def getSensacionalistaData(sarcasm=True):
   url = "https://www.sensacionalista.com.br/pais/page/"
 
-  # Get the maximum number of pages from sensacionalista.com.br/pais/page/1
   lastPage = getLastPage(url, "last", r"title=\"[^\"]*", 7, 0)
   print("[0]Total of {0} pages to crawl".format(lastPage))
 
@@ -66,106 +61,94 @@ Otimizar
   rawData = getRawData(htmls, "td_module_8 td_module_wrap", r"<a[^<]*</a>")
   print("[2]Amount of {0} raw data".format(len(rawData)))
 
-  # # Format the data to a dataframe
-  # crawler = pd.DataFrame(columns=['article_link','headline','is_sarcastic'])
-  # for data in rawData:
-  #   dataList = [[],[],[]]
-  #   for tmp in findLink.finditer(data):
-  #     dataList[0] = data[tmp.start()+6:tmp.end()]
-  #   for tmp in findTitle.finditer(data):
-  #     dataList[1] = data[tmp.start()+7:tmp.end()]
-  #   dataList[2] = sarcastic
-  #   crawler.loc[len(crawler)] = dataList
-  # print("[3]Dataframe formated and created")
+  findLink = re.compile(r"href=\"[^\"]*")
+  findTitle = re.compile(r"title=\"[^\"]*")
+  
+  dataFrame = pd.DataFrame(columns=['article_link','headline','is_sarcastic'])
+  for data in rawData:
+    dataList = [[],[],[]]
+    for tmp in findLink.finditer(data):
+      dataList[0] = data[tmp.start()+6:tmp.end()]
+    for tmp in findTitle.finditer(data):
+      dataList[1] = data[tmp.start()+7:tmp.end()]
+    dataList[2] = sarcasm
+    dataFrame.loc[len(dataFrame)] = dataList
+  print("[3]Dataframe formated and created")
 
-  # return crawler
-
-# Commented out IPython magic to ensure Python compatibility.
-# %%time
-# sensacionalista = getSensacionalistaData()
-
-sensacionalista.to_csv("sensa.csv", sep=';', index=False, encoding='utf-8-sig')
+  return dataFrame
 
 """## The Piauí Herald crawler
-Em progresso
+Em progresso (me irritei e comecei novamente)
 """
 
-# def getPiauiHerald(sarcastic=True):
-#class="arquivo-lista tab-container blocos-column"
-#HeraldAjax blocos-column
-
-findAnchor = re.compile(r"<a href=[^>]*>\s<h2[^<]*")
-findTitle = re.compile(r"<h2 class=\"bloco-title\">\\r\\n[ ]{35}")
-findLink = re.compile(r"href=\"[^\"]*")
-findYear = re.compile(r">\d{4}<")
-
-# findYear = re.compile(r"data-tab=\"arquivo_\d*\">")
-
+# def getPiauiHerald(sarcasm=True):
 url = "https://piaui.folha.uol.com.br/herald/"
+findYears = re.compile(r"data-tab=\"arquivo_\d{4}\">")
+findLink = re.compile(r"<a href=\"[^\"]*\">")
+findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
+# findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
 # htmls = []
 
 # html = requests.get(url, headers=header)
 # bs = BeautifulSoup(html.text, "html.parser")
-# page = str(bs.find_all("div", class_="arquivo-lista tab-container blocos-column"))
-# url = url[:-7]
-# for year in findYear.finditer(page):
-#   html = requests.get(url + page[year.start()+1:year.end()-1], headers=header)
-#   htmls.append(html)
+# li = str(bs.find_all("li", class_="tab-btn"))
+# for year in findYears.finditer(li):
+  # htmls.append(requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=header))
 
-rawData = []
-for html in htmls:
-  bs = BeautifulSoup(html.text, "html.parser")
-  div = str(bs.find_all("div", class_="inner"))
-  for anc in findAnchor.finditer(div):
-    rawData.append(div[anc.start():anc.end()])
-
-crawler = pd.DataFrame(columns=['article_link','headline','is_sarcastic'])
+# rawData = getRawData(htmls, "bloco size-2", r"<a href=[^>]*>\s<h2[^<]*")
+dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
 for data in rawData:
+  if(len(dataFrame) == 614):
+    print(data)
   dataList = [[],[],[]]
   for tmp in findLink.finditer(data):
-    dataList[0] = data[tmp.start()+6:tmp.end()]
+    dataList[0] = data[tmp.start()+9:tmp.end()-2]
   for tmp in findTitle.finditer(data):
-    dataList[1] = data[tmp.start():tmp.end()]
-  dataList[2] =  True
-  crawler.loc[len(crawler)] = dataList
+    dataList[1] = data[tmp.start()+26:tmp.end()]
+  dataList[2] = True
+  dataFrame.loc[len(dataFrame)] = dataList
+# a = dataFrame.loc[614]
+# print(a[r"headline"])
+# dataFrame.to_csv("dataFrame.csv", sep=";", index=False, encoding="utf-8-sig")
 
-crawler
+"""## HuffPost Brasil crawler"""
 
-# rawData
+def getHuffPostBrasilData(sarcasm=False):
+  url = "https://www.huffpostbrasil.com/noticias/"
 
-rawData
+  lastPage = getLastPage(url, "pagination__link", r"href=\"/noticias/\d*/\"", 16, 2)
+  print("[0]Total of {0} pages to crawl".format(lastPage))
 
-"""## HuffPost Brasil crawler
-Otimizando
-"""
+  htmls = getRequests(url, lastPage)
+  print("[1]All {0} pages requested successful".format(len(htmls)))
 
-# def getHuffPostBrasilData(sarcastic=False):
-url = "https://www.huffpostbrasil.com/noticias/"
+  rawData = getRawData(htmls, "apage-rail-cards", r"<a class=\"[^<]*</a>")
+  print("[2]Amount of {0} raw data".format(len(rawData)))
 
-lastPage = getLastPage(url, "pagination__link", r"href=\"/noticias/\d*/\"", 16, 2)
-print("[0]Total of {0} pages to crawl".format(lastPage))
+  findLink = re.compile(r"href=\"[^\"]*\"")
+  findTitle = re.compile(r"target=\"_self\">[^<]*<")
 
-htmls = getRequests(url, lastPage)
-print("[1]All {0} pages requested successful".format(len(htmls)))
+  dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
+  for data in rawData:
+    dataList = [[],[],[]]
+    for tmp in findLink.finditer(data):
+      dataList[0] = url[:-9] + data[tmp.start()+7:tmp.end()-1]
+    for tmp in findTitle.finditer(data):
+      dataList[1] = data[tmp.start()+15:tmp.end()-1]
+    dataList[2] = sarcasm
+    dataFrame.loc[len(dataFrame)] = dataList
+  
+  return dataFrame
 
-rawData = getRawData(htmls, "apage-rail-cards", r"<a class=\"[^<]*</a>")
-print("[2]Amount of {0} raw data".format(len(rawData)))
+# Commented out IPython magic to ensure Python compatibility.
+# %%time
+# sensacionalista = getSensacionalistaData()
+# sensacionalista.to_csv("sensa.csv", sep=';', index=False, encoding='utf-8-sig')
 
-findLink = re.compile(r"href=\"[^\"]*\"")
-findTitle = re.compile(r"target=\"_self\">[^<]*<")
-
-crawler = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
-for data in rawData:
-  dataList = [[],[],[]]
-  for tmp in findLink.finditer(data):
-    dataList[0] = url[:-9] + data[tmp.start()+7:tmp.end()-1]
-  for tmp in findTitle.finditer(data):
-    dataList[1] = data[tmp.start()+15:tmp.end()-1]
-  dataList[2] = False
-  crawler.loc[len(crawler)] = dataList
-crawler
-
-crawler.to_csv("test.csv", sep=';', index=False, encoding="utf-8-sig")
+# Commented out IPython magic to ensure Python compatibility.
+# %%time
+# huffpost = getHuffPostBrasilData()
+# huffpost.to_csv("test.csv", sep=';', index=False, encoding="utf-8-sig")
 
 """## Há procura"""
 
