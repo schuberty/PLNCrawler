@@ -12,4 +12,4 @@ Um web crawler para criação de datasets
 
 </div>
 
-PLNCrawler é um web crawler focado na criação automatizada de datasets utilizados no processamento de linguagem natural. Os sites incluídos são [Sensacionalista](https://www.sensacionalista.com.br), [The piauí Herald](https://piaui.folha.uol.com.br/herald/), [HuffPost Brasil](https://www.huffpostbrasil.com/) e ...
+PLNCrawler é um web crawler focado na criação automatizada de datasets utilizados no processamento de linguagem natural. Os sites incluídos são [Sensacionalista](https://www.sensacionalista.com.br), [The piauí Herald](https://piaui.folha.uol.com.br/herald/), [HuffPost Brasil](https://www.huffpostbrasil.com/) e [Nexo Jornal](https://www.nexojornal.com.br/)
