@@ -35,13 +35,13 @@ def getRequests(url, lastPage):
   
   return htmls
 
-def getRawData(htmls, htmlClass, rawString):
+def getRawData(htmls, htmlClass, rawString, element="div"):
   findAnchor = re.compile(rawString)
   rawData = []
 
   for html in htmls:
     bs = BeautifulSoup(html.text, "html.parser")
-    div = str(bs.find_all("div", class_=htmlClass))
+    div = str(bs.find_all(element, class_=htmlClass))
     for anc in findAnchor.finditer(div):
       rawData.append(div[anc.start():anc.end()])
   
@@ -81,35 +81,35 @@ def getSensacionalistaData(sarcasm=True):
 Em progresso (me irritei e comecei novamente)
 """
 
-# def getPiauiHerald(sarcasm=True):
-url = "https://piaui.folha.uol.com.br/herald/"
-findYears = re.compile(r"data-tab=\"arquivo_\d{4}\">")
-findLink = re.compile(r"<a href=\"[^\"]*\">")
-findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
-# findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
-# htmls = []
+def getPiauiHeraldData(sarcasm=True):
+  url = "https://piaui.folha.uol.com.br/herald/"
 
-# html = requests.get(url, headers=header)
-# bs = BeautifulSoup(html.text, "html.parser")
-# li = str(bs.find_all("li", class_="tab-btn"))
-# for year in findYears.finditer(li):
-  # htmls.append(requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=header))
+  findYears = re.compile(r"data-tab=\"arquivo_\d{4}\">")
+  findLink = re.compile(r"<a href=\"[^\"]*\">")
+  findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
+  findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
+  
+  htmls = []
 
-# rawData = getRawData(htmls, "bloco size-2", r"<a href=[^>]*>\s<h2[^<]*")
-dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
-for data in rawData:
-  if(len(dataFrame) == 614):
-    print(data)
-  dataList = [[],[],[]]
-  for tmp in findLink.finditer(data):
-    dataList[0] = data[tmp.start()+9:tmp.end()-2]
-  for tmp in findTitle.finditer(data):
-    dataList[1] = data[tmp.start()+26:tmp.end()]
-  dataList[2] = True
-  dataFrame.loc[len(dataFrame)] = dataList
-# a = dataFrame.loc[614]
-# print(a[r"headline"])
-# dataFrame.to_csv("dataFrame.csv", sep=";", index=False, encoding="utf-8-sig")
+  html = requests.get(url, headers=header)
+  bs = BeautifulSoup(html.text, "html.parser")
+  li = str(bs.find_all("li", class_="tab-btn"))
+  for year in findYears.finditer(li):
+    htmls.append(requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=header))
+
+  rawData = getRawData(htmls, "bloco size-2", r"<a href=[^>]*>\s<h2[^<]*")
+  dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
+  for data in rawData:
+    dataList = [[],[],[]]
+    for tmp in findLink.finditer(data):
+      dataList[0] = data[tmp.start()+9:tmp.end()-2]
+    for tmp in findTitle.finditer(data):
+      dataList[1] = data[tmp.start()+26:tmp.end()]
+    if(dataList[1] == ""): continue
+    dataList[2] = True
+    dataFrame.loc[len(dataFrame)] = dataList
+
+  return dataFrame
 
 """## HuffPost Brasil crawler"""
 
@@ -140,15 +140,50 @@ def getHuffPostBrasilData(sarcasm=False):
   
   return dataFrame
 
+"""## Nexo Jornal
+Em progresso
+"""
+
+def getNexoJornalData(sarcasm=False):
+  url = "https://www.nexojornal.com.br/tema/Sociedade?pagina="
+
+  lastPage = getLastPage(url+"1", "Pagination__link___1VkYg", r">\d{3}</a>", 1, 4)
+
+  htmls = getRequests(url, lastPage)
+
+  rawData = getRawData(htmls, "Teaser__title-dark___1HEzZ", r"<a alt=\"[^>]*>", element="h4")
+
+  findLink = re.compile(r"href=\"[^\"]*\"")
+  findTitle = re.compile(r"title=\"[^\"]*\">")
+
+  dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
+  for data in rawData:
+    dataList = [[],[],[]]
+    for tmp in findLink.finditer(data):
+      dataList[0] = url[:-23] + data[tmp.start()+6:tmp.end()-1]
+    for tmp in findTitle.finditer(data):
+      dataList[1] = data[tmp.start()+7:tmp.end()-2]
+    dataList[2] = sarcasm
+    dataFrame.loc[len(dataFrame)] = dataList
+
+  return dataFrame
+
+"""## Main"""
+
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
-# sensacionalista = getSensacionalistaData()
-# sensacionalista.to_csv("sensa.csv", sep=';', index=False, encoding='utf-8-sig')
+# sensacinalista = getSensacionalistaData()
+
+# Commented out IPython magic to ensure Python compatibility.
+# %%time
+# piauiherald = getPiauiHeraldData()
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
 # huffpost = getHuffPostBrasilData()
-# huffpost.to_csv("test.csv", sep=';', index=False, encoding="utf-8-sig")
 
-"""## Há procura"""
+# Commented out IPython magic to ensure Python compatibility.
+# %%time
+# nexojornal = getNexoJornalData()
 
+nexojornal
