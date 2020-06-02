@@ -1,0 +1,4 @@
+beautifulsoup4==4.9.1
+pandas==1.0.4
+requests==2.23.0
+regex==2020.5.14
