@@ -13,177 +13,138 @@ header = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko
 
 """## General functions"""
 
-def getLastPage(url, htmlClass, rawString, rmStart, rmEnd):
-  findLastPage = re.compile(rawString)
+def get_last_page(url, html_class, re_string, rm_start, rm_end):
+  find_last_page = re.compile(re_string)
 
   url = url + '1'
   html = requests.get(url, headers=header)
   bs = BeautifulSoup(html.text, "html.parser")
-  lastPage = str(bs.find_all("a", class_=htmlClass))
-  for page in findLastPage.finditer(lastPage):
-    page = int(lastPage[page.start()+rmStart:page.end()-rmEnd])
+  last_page = str(bs.find_all("a", class_=html_class))
+  for page in find_last_page.finditer(last_page):
+    page = int(last_page[page.start()+rm_start:page.end()-rm_end])
 
   return page
 
-def getRequests(url, lastPage):
+def get_requests(url, last_page):
   htmls = []
   
-  for pageNum in range(1, lastPage+1):
-    pageUrl = url + str(pageNum)
-    html = requests.get(pageUrl, headers=header)
+  for page_num in range(1, last_page+1):
+    page_url = url + str(page_num)
+    html = requests.get(page_url, headers=header)
     htmls.append(html)
   
   return htmls
 
-def getRawData(htmls, htmlClass, rawString, element="div"):
-  findAnchor = re.compile(rawString)
-  rawData = []
+def get_raw_data(htmls, html_class, re_element, element="div"):
+  find_anchor = re.compile(re_element)
+  raw_data = []
 
   for html in htmls:
     bs = BeautifulSoup(html.text, "html.parser")
-    div = str(bs.find_all(element, class_=htmlClass))
-    for anc in findAnchor.finditer(div):
-      rawData.append(div[anc.start():anc.end()])
+    raw = str(bs.find_all(element, class_=html_class))
+    for anc in find_anchor.finditer(raw):
+      raw_data.append(raw[anc.start():anc.end()])
   
-  return rawData
+  return raw_data
+
+def get_data_frame(raw_data, sarcasm, re_link, re_title, rm_start, rm_end, url=""):
+  find_link = re.compile(re_link)
+  find_title = re.compile(re_title)
+
+  data_frame = pd.DataFrame(columns=['article_link','headline','is_sarcastic'])
+
+  for data in raw_data:
+    data_list = [[],[],[]]
+    for tmp in find_link.finditer(data):
+      data_list[0] = url + data[tmp.start()+rm_start[0]:tmp.end()+rm_end[0]]
+    for tmp in find_title.finditer(data):
+      data_list[1] = data[tmp.start()+rm_start[1]:tmp.end()+rm_end[1]]
+    if(data_list[1] == ""): continue
+    data_list[2] = sarcasm
+    data_frame.loc[len(data_frame)] = data_list
+  
+  return data_frame
 
 """## Sensacionalista crawler"""
 
-def getSensacionalistaData(sarcasm=True):
+def get_sensacionalista_data():
   url = "https://www.sensacionalista.com.br/pais/page/"
 
-  lastPage = getLastPage(url, "last", r"title=\"[^\"]*", 7, 0)
-  print("[0]Total of {0} pages to crawl".format(lastPage))
+  last_page = get_last_page(url, "last", r"title=\"[^\"]*", 7, 0)
+  htmls = get_requests(url, last_page)
+  raw_data = get_raw_data(htmls, "td_module_8 td_module_wrap", r"<a[^<]*</a>")
+  data_frame = get_data_frame(raw_data, True,
+                              r"href=\"[^\"]*", r"title=\"[^\"]*",
+                              [6,7], [0, 0])
 
-  htmls = getRequests(url, lastPage)
-  print("[1]All {0} pages requested successful".format(len(htmls)))
-  
-  rawData = getRawData(htmls, "td_module_8 td_module_wrap", r"<a[^<]*</a>")
-  print("[2]Amount of {0} raw data".format(len(rawData)))
+  return data_frame
 
-  findLink = re.compile(r"href=\"[^\"]*")
-  findTitle = re.compile(r"title=\"[^\"]*")
-  
-  dataFrame = pd.DataFrame(columns=['article_link','headline','is_sarcastic'])
-  for data in rawData:
-    dataList = [[],[],[]]
-    for tmp in findLink.finditer(data):
-      dataList[0] = data[tmp.start()+6:tmp.end()]
-    for tmp in findTitle.finditer(data):
-      dataList[1] = data[tmp.start()+7:tmp.end()]
-    dataList[2] = sarcasm
-    dataFrame.loc[len(dataFrame)] = dataList
-  print("[3]Dataframe formated and created")
+"""## The Piauí Herald crawler"""
 
-  return dataFrame
-
-"""## The Piauí Herald crawler
-Em progresso (me irritei e comecei novamente)
-"""
-
-def getPiauiHeraldData(sarcasm=True):
+def get_piauiherald_data():
   url = "https://piaui.folha.uol.com.br/herald/"
 
-  findYears = re.compile(r"data-tab=\"arquivo_\d{4}\">")
-  findLink = re.compile(r"<a href=\"[^\"]*\">")
-  findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
-  findTitle = re.compile(r"<h2 class=\"bloco-title\">\s*.*")
-  
   htmls = []
-
+  find_years = re.compile(r"data-tab=\"arquivo_\d{4}\">")
   html = requests.get(url, headers=header)
   bs = BeautifulSoup(html.text, "html.parser")
   li = str(bs.find_all("li", class_="tab-btn"))
-  for year in findYears.finditer(li):
+  for year in find_years.finditer(li):
     htmls.append(requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=header))
 
-  rawData = getRawData(htmls, "bloco size-2", r"<a href=[^>]*>\s<h2[^<]*")
-  dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
-  for data in rawData:
-    dataList = [[],[],[]]
-    for tmp in findLink.finditer(data):
-      dataList[0] = data[tmp.start()+9:tmp.end()-2]
-    for tmp in findTitle.finditer(data):
-      dataList[1] = data[tmp.start()+26:tmp.end()]
-    if(dataList[1] == ""): continue
-    dataList[2] = True
-    dataFrame.loc[len(dataFrame)] = dataList
+  raw_data = get_raw_data(htmls, "bloco size-2", r"<a href=[^>]*>\s<h2[^<]*")
+  data_frame = get_data_frame(raw_data, True, 
+                              r"<a href=\"[^\"]*\">", r"<h2 class=\"bloco-title\">\s*.*",
+                              [9,26], [2,0])
 
-  return dataFrame
+  return data_frame
 
 """## HuffPost Brasil crawler"""
 
-def getHuffPostBrasilData(sarcasm=False):
+def get_huffpostbrasil_data():
   url = "https://www.huffpostbrasil.com/noticias/"
 
-  lastPage = getLastPage(url, "pagination__link", r"href=\"/noticias/\d*/\"", 16, 2)
-  print("[0]Total of {0} pages to crawl".format(lastPage))
-
-  htmls = getRequests(url, lastPage)
-  print("[1]All {0} pages requested successful".format(len(htmls)))
-
-  rawData = getRawData(htmls, "apage-rail-cards", r"<a class=\"[^<]*</a>")
-  print("[2]Amount of {0} raw data".format(len(rawData)))
-
-  findLink = re.compile(r"href=\"[^\"]*\"")
-  findTitle = re.compile(r"target=\"_self\">[^<]*<")
-
-  dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
-  for data in rawData:
-    dataList = [[],[],[]]
-    for tmp in findLink.finditer(data):
-      dataList[0] = url[:-9] + data[tmp.start()+7:tmp.end()-1]
-    for tmp in findTitle.finditer(data):
-      dataList[1] = data[tmp.start()+15:tmp.end()-1]
-    dataList[2] = sarcasm
-    dataFrame.loc[len(dataFrame)] = dataList
+  last_page = get_last_page(url, "pagination__link", r"href=\"/noticias/\d*/\"", 16, 2)
+  htmls = get_requests(url, last_page)
+  raw_data = get_raw_data(htmls, "apage-rail-cards", r"<a class=\"[^<]*</a>")
+  data_frame = get_data_frame(raw_data, False,
+                              r"href=\"[^\"]*\"", r"target=\"_self\">[^<]*<",
+                              [7,15], [1,1], url=url[:-9])
   
-  return dataFrame
+  return data_frame
 
-"""## Nexo Jornal
-Em progresso
-"""
+"""## Nexo Jornal crawler"""
 
-def getNexoJornalData(sarcasm=False):
+def get_nexojornal_data():
   url = "https://www.nexojornal.com.br/tema/Sociedade?pagina="
 
-  lastPage = getLastPage(url+"1", "Pagination__link___1VkYg", r">\d{3}</a>", 1, 4)
+  last_page = get_last_page(url+"1", "Pagination__link___1VkYg", r">\d{3}</a>", 1, 4)
+  htmls = get_requests(url, last_page)
+  raw_data = get_raw_data(htmls, "Teaser__title-dark___1HEzZ", r"<a alt=\"[^>]*>", element="h4")
+  data_frame = get_data_frame(raw_data, False,
+                              r"href=\"[^\"]*\"", r"title=\"[^\"]*\">", 
+                              [6,7], [1,2], url=url[:-23])
 
-  htmls = getRequests(url, lastPage)
-
-  rawData = getRawData(htmls, "Teaser__title-dark___1HEzZ", r"<a alt=\"[^>]*>", element="h4")
-
-  findLink = re.compile(r"href=\"[^\"]*\"")
-  findTitle = re.compile(r"title=\"[^\"]*\">")
-
-  dataFrame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
-  for data in rawData:
-    dataList = [[],[],[]]
-    for tmp in findLink.finditer(data):
-      dataList[0] = url[:-23] + data[tmp.start()+6:tmp.end()-1]
-    for tmp in findTitle.finditer(data):
-      dataList[1] = data[tmp.start()+7:tmp.end()-2]
-    dataList[2] = sarcasm
-    dataFrame.loc[len(dataFrame)] = dataList
-
-  return dataFrame
+  return data_frame
 
 """## Main"""
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
-# sensacinalista = getSensacionalistaData()
+# sensacinalista = get_sensacionalista_data()
+# sensacinalista
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
-# piauiherald = getPiauiHeraldData()
+# piauiherald = get_piauiherald_data()
+# piauiherald
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
-# huffpost = getHuffPostBrasilData()
+# huffpost = get_huffpostbrasil_data()
+# huffpost
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
-# nexojornal = getNexoJornalData()
-
-nexojornal
+# nexojornal = get_nexojornal_data()
+# nexojornal
