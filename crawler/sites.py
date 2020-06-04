@@ -50,7 +50,7 @@ def get_piauiherald_data():
   url = "https://piaui.folha.uol.com.br/herald/"
 
   print("[+] Starting crawling of 'The piaui Herald' data.")
-  print("[+] Requesting all archived pages (it might take a while) from:\n\t'{1}'".format(url))
+  print("[+] Requesting all archived pages (it might take a while) from:\n\t'{0}'".format(url))
 
   htmls = []
   find_years = re.compile(r"data-tab=\"arquivo_\d{4}\">")
