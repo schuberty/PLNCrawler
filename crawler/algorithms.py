@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import re
 from bs4 import BeautifulSoup
+from time import sleep
 
 _header = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0'}
 
@@ -70,9 +71,21 @@ def get_requests(
   """
   htmls = []
   
+  print("[+] Requesting all {0} pages (it might take a while) from:\n\t'{1}'".format(last_page,url))
+
   for page_num in range(1, last_page):
     page_url = url + str(page_num)
-    html = requests.get(page_url, headers=_header)
+    try:
+      html = requests.get(page_url, headers=_header)
+    except requests.exceptions.ConnectionError:
+      print("[!] Connection error occurred, trying again the page {0} after 2 seconds;".format(page_url))
+      sleep(2)
+      try:
+        html = requests.get(page_url, headers=_header)
+      except requests.exceptions.RequestException:
+        print("[!] Another error occurred, skipping the page {0}.".format(page_url))
+        sleep(1)
+        continue
     htmls.append(html)
   
   return htmls
@@ -112,6 +125,8 @@ def get_raw_data(
     for anc in find_anchor.finditer(raw):
       raw_data.append(raw[anc.start():anc.end()])
   
+  print("[+] Total of {0} raw data collected;".format(len(raw_data)))
+
   return raw_data
 
 
@@ -168,5 +183,7 @@ def get_data_frame(
     if(data_list[1] == ""): continue
     data_list[2] = sarcasm
     data_frame.loc[len(data_frame)] = data_list
+
+  print("[+] Dataframe completed")
   
   return data_frame

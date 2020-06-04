@@ -1,4 +1,5 @@
 from crawler.algorithms import *
+from time import sleep
 
 _header = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0'}
 
@@ -13,6 +14,8 @@ def get_sensacionalista_data():
     Dataframe containing all the crawling information
   """
   url = "https://www.sensacionalista.com.br/pais/page/"
+
+  print("[+] Starting crawling of 'Sensacionalista' data.")
 
   last_page = get_last_page(url, "last", r"title=\"[^\"]*", 7, 0)
 
@@ -46,6 +49,8 @@ def get_piauiherald_data():
   """
   url = "https://piaui.folha.uol.com.br/herald/"
 
+  print("[+] Starting crawling of 'The piaui Herald' data.")
+  print("[+] Requesting all archived pages (it might take a while) from:\n\t'{1}'".format(url))
 
   htmls = []
   find_years = re.compile(r"data-tab=\"arquivo_\d{4}\">")
@@ -53,7 +58,20 @@ def get_piauiherald_data():
   bs = BeautifulSoup(html.text, "html.parser")
   li = str(bs.find_all("li", class_="tab-btn"))
   for year in find_years.finditer(li):
-    htmls.append(requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=_header))
+    try:
+      html = requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=_header)
+    except requests.exceptions.ConnectionError:
+      print("[!] Connection error occurred, trying again the page {0} after 2 seconds;".format(str(url[:-7] + li[year.start()+18:year.end()-2])))
+      sleep(2)
+      try:
+        html = requests.get(str(url[:-7] + li[year.start()+18:year.end()-2]), headers=_header)
+        sleep(1)
+      except requests.exceptions.RequestException:
+        print("[!] Another error occurred, skipping the page {0}.".format(str(url[:-7] + li[year.start()+18:year.end()-2])))
+        sleep(1)
+        continue
+
+    htmls.append(html)
 
   raw_data = get_raw_data(htmls, "bloco size-2", r"<a href=[^>]*>\s<h2[^<]*")
 
@@ -64,9 +82,9 @@ def get_piauiherald_data():
   return data_frame
 
 
-def get_huffpostbrazil_data():
+def get_huffpostbrasil_data():
   """
-  Get HuffPost Brazil news data.
+  Get HuffPost Brasil news data.
   Link is 'https://www.huffpostbrasil.com/noticias/'.
 
   Returns
@@ -75,6 +93,8 @@ def get_huffpostbrazil_data():
     Dataframe containing all the crawling information
   """
   url = "https://www.huffpostbrasil.com/noticias/"
+
+  print("[+] Starting crawling of 'HuffPost Brasil' data.")
 
   last_page = get_last_page(url, "pagination__link", r"href=\"/noticias/\d*/\"", 16, 2)
 
@@ -100,6 +120,8 @@ def get_nexojornal_data():
     Dataframe containing all the crawling information
   """
   url = "https://www.nexojornal.com.br/tema/Sociedade?pagina="
+
+  print("[+] Starting crawling of 'Nexo Jornal' data.")
 
   last_page = get_last_page(url+"1", "Pagination__link___1VkYg", r">\d{3}</a>", 1, 4)
 
