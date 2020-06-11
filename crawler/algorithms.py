@@ -1,189 +1,176 @@
 import pandas as pd
-import requests
 import re
+import requests
+
 from bs4 import BeautifulSoup
-from time import sleep
+from time import sleep,localtime,strftime
 
-_header = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0'}
+class Crawler:
+	"""
+	"""
+	__header = {'user-agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0"}
+	def __init__(self, url, sarcasm, as_archived=False, file_name=""):
+		self.__url = url
+		self.__sarcasm = sarcasm
+		self.__as_archived = as_archived
+		self.__file_name = file_name
 
-def get_last_page(
-    url: str,
-    html_class: str,
-    re_string: str,
-    rm_start: int,
-    rm_end: int
-  ) -> int:
-  """
-  Get the last page number of a specific website.
-
-  Parameters
-  ----------
-  url : str
-    Website URL to find the last page it has
-  html_class : str
-    Class of the a href attribute related to the maximum number
-  re_string : raw str
-    Regular expression to find the last page refer
-  rm_start : int
-    How much to exclude from the beginning of the substring founded by the RE
-  rm_end : int
-    How much to exclude from the end of the substring founded by the RE
-
-  Returns
-  -------
-  int
-    Last page number founded of a specific website
-  """
-  find_last_page = re.compile(re_string)
-
-  url = url + '1'
-  html = requests.get(url, headers=_header)
-  bs = BeautifulSoup(html.text, "html.parser")
-  element = str(bs.find_all("a", class_=html_class))
-  for page in find_last_page.finditer(element):
-    last_page = int(element[page.start()+rm_start:page.end()-rm_end])
-
-  return last_page
+		self.__htmls = []
+		self.__pages = None
+		self.__raw_data = []
+		self.__dataframe = pd.DataFrame(columns=["article_link","headline","is_sarcastic","text"])
 
 
-def get_requests(
-    url: str,
-    last_page: int
-  ) -> list:
-  """
-  Get all requests from a URL, from the first to the last page.
+	def get_one_request(self, page_url):
+		"""Get one html request.
 
-  Parameters
-  ----------
-  url : str
-    Website URL to get all requests
-  last_page : int
-    The website URL last page
+		Returns
+		-------
+		requests.models.Response
+			Request related to a specific page.
+		"""
+		error = None
 
-  Returns
-  -------
-  list
-    All page requests from first to last page
-
-  Note
-  ----
-  May occurs an error if any type of internet interference happens.
-  """
-  htmls = []
-  
-  print("[+] Requesting all {0} pages (it might take a while) from:\n\t'{1}'".format(last_page,url))
-
-  for page_num in range(1, last_page):
-    page_url = url + str(page_num)
-    try:
-      html = requests.get(page_url, headers=_header)
-    except requests.exceptions.ConnectionError:
-      print("[!] Connection error occurred, trying again the page {0} after 2 seconds;".format(page_url))
-      sleep(2)
-      try:
-        html = requests.get(page_url, headers=_header)
-      except requests.exceptions.RequestException:
-        print("[!] Another error occurred, skipping the page {0}.".format(page_url))
-        sleep(1)
-        continue
-    htmls.append(html)
-  
-  return htmls
+		while error != False:
+			error = False
+			try:
+				html = requests.get(page_url, headers=self.__header)
+			except requests.RequestException:
+				print("([!] Error occurred, trying again the page {0} after 5 seconds".format(page_url))
+				sleep(5)
+				error = True
+		return html
 
 
-def get_raw_data(
-      htmls: list,
-      html_class: str,
-      re_element: str,
-      element: str="div"
-    ) -> list:
-  """
-  Get a specified part of a HTML page text from a element and class
+	def set_pages(self, html_class, re_string, start, end, element="a", shorter=0):
+		"""Find the last page of a website.
+		e.g. "Pages 1, 2, ..., 34, 35" <- Last page here is 35;
+		Or find the strings rellated to the archived data.
+		e.g. "News by year: 2020, 2019, ...,2005" <- Here is a list[2020, ..., 2005].
+		
+		In both cases it'll depend if the __as_archived variable is True or False.
 
-  Parameters
-  ----------
-  htmls : list
-    A HTML request list
-  html_class : str
-    Class of the a specified element
-  re_element : str
-    Regular expression to find a specific HTML element
-  element : str, default "div"
-    Element of the HTML to be founded
+		Parameters
+		----------
+		html_class : str
+			Class of the a href attribute related to the maximum number.
+		re_string : raw str
+			Regular expression to find the last page refer.
+		rm_start : int
+			How much to exclude from the beginning of the substring founded by the RE.
+		rm_end : int
+			How much to exclude from the end of the substring founded by the RE.
+		element: str, default "a"
+			Element of the HTML to be founded.
+		shorter: int, default 0
+			If it's archived style page, set how much to remove from the url to get the
+			pages url list. If necessary.
+		"""
+		find_pages = re.compile(re_string)
+		html = True
 
-  Returns
-  -------
-  list
-    All the htmls data splited by a specific element class and RE
-  """
-  find_anchor = re.compile(re_element)
-  raw_data = []
+		while html == True:
+			html = self.get_one_request(self.__url + ("1", "")[self.__as_archived])
+		bs = BeautifulSoup(html.text, "html.parser")
+		element = str(bs.find_all(element, class_=html_class))
 
-  for html in htmls:
-    bs = BeautifulSoup(html.text, "html.parser")
-    raw = str(bs.find_all(element, class_=html_class))
-    for anc in find_anchor.finditer(raw):
-      raw_data.append(raw[anc.start():anc.end()])
-  
-  print("[+] Total of {0} raw data collected;".format(len(raw_data)))
+		if self.__as_archived == True:
+			pages = []
+			for archive in find_pages.finditer(element):
+				pages.append(str(self.__url[:-shorter]) + element[archive.start()+start:archive.end()-end])
+		else:
+			for page in find_pages.finditer(element):
+				pages = int(element[page.start()+start:page.end()-end])
 
-  return raw_data
+		self.__pages = pages
 
 
-def get_data_frame(
-      raw_data: str,
-      sarcasm: bool,
-      re_link: str,
-      re_title: str,
-      rm_start: tuple,
-      rm_end: tuple,
-      url: str=""
-    ) -> pd.DataFrame:
-  """
-  Get a specific data of links and title information from a list of HTML
-  specific data
+	def get_html_requests(self):
+		htmls = []
+		"""Get all requests from a ammount of URLs.
 
-  Parameters
-  ----------
-  raw_data : str
-    A HTML data list splited by a specific element class and RE
-  sarcasm : bool
-    If the article containing is sarcastic or not
-  re_link : str
-    Regular expression to find a href HTML element
-  re_title : str
-    Regular expression to find a title HTML element
-  rm_start : tuple, (int,int)
-    How much to exclude from the beginning of two substrings founded by the
-    two regular expressions: re_link and re_title, in that order
-  rm_end : tuple, (int,int)
-    How much to exclude from the end of two substrings founded by the two
-    regular expressions: re_link and re_title, in that order
-  url : str, default ""
-    A substring to add in the beginning of the link founded by the re_link;
-    It's only used if the website URL is different from the original used in
-    the crawling
+		Returns
+		-------
+		list
+			All pages requested.
 
-  Returns
-  -------
-  pd.DataFrame
-    Dataframe containing all the informatiom
-  """
-  find_link = re.compile(re_link)
-  find_title = re.compile(re_title)
+		Note
+		----
+		May occurs an infinite loop if any type of internet interference happens.
+		"""
+		print("[+] Requesting all pages (it might take a while) from:\n\t\'{0}\'".format(self.__url))
 
-  data_frame = pd.DataFrame(columns=["article_link","headline","is_sarcastic"])
+		if self.__as_archived == True:
+			for arch in self.__pages:
+				htmls.append(self.get_one_request(arch))
+		else:
+			for page_num in range(1, self.__pages):
+				page_url = self.__url + str(page_num)
+				htmls.append(self.get_one_request(page_url))
+				
+		return htmls
 
-  for data in raw_data:
-    data_list = [[],[],[]]
-    for tmp in find_link.finditer(data):
-      data_list[0] = url + data[tmp.start()+rm_start[0]:tmp.end()+rm_end[0]]
-    for tmp in find_title.finditer(data):
-      data_list[1] = data[tmp.start()+rm_start[1]:tmp.end()+rm_end[1]]
-    if(data_list[1] == ""): continue
-    data_list[2] = sarcasm
-    data_frame.loc[len(data_frame)] = data_list
 
-  print("[+] Dataframe completed")
-  
-  return data_frame
+	def set_raw_data(self, html_class, re_string, element="div"):
+		"""Find some specific part of an HTML class.
+
+		Parameters
+		----------
+		html_class : str
+			Class of the a specified element.
+		re_element : str
+			Regular expression to find a specific HTML element.
+		element : str, default "div"
+			Element of the HTML to be founded.
+		"""
+		find_element = re.compile(re_string)
+
+		for html in self.get_html_requests():
+			bs = BeautifulSoup(html.text, "html.parser")
+			raw = str(bs.find_all(element, class_=html_class))
+			for text in find_element.finditer(raw):
+				self.__raw_data.append(raw[text.start():text.end()])
+
+		print("[+] Total of {0} raw data collected".format(len(self.__raw_data)))
+
+
+	def set_data_frame(self, re_link, re_title, rm_start, rm_end, url_prefix=""):
+		"""Find a specific data of links and title information from a list of
+		HTML specific data.
+
+		Parameters
+		----------
+		re_link : str
+			Regular expression to find a href HTML element.
+		re_title : str
+			Regular expression to find a title HTML element.
+		rm_start : tuple, (int,int)
+			How much to exclude from the beginning of two substrings founded by the
+			two regular expressions: re_link and re_title, in that order.
+		rm_end : tuple, (int,int)
+			How much to exclude from the end of two substrings founded by the two
+			regular expressions: re_link and re_title, in that order.
+		url : str, default ""
+			A substring to add in the beginning of the link founded by the re_link;
+			It's only used if the website URL is different from the original used in
+			the crawling.
+		"""
+		find_link = re.compile(re_link)
+		find_title = re.compile(re_title)
+
+		for data in self.__raw_data:
+			data_list = [[],[],[],[]]
+			for tmp in find_link.finditer(data):
+				data_list[0] = url_prefix + data[tmp.start()+rm_start[0]:tmp.end()+rm_end[0]]
+			for tmp in find_title.finditer(data):
+				data_list[1] = data[tmp.start()+rm_start[1]:tmp.end()+rm_end[1]]
+			if data_list[1] == "" or data_list[3] == "":
+				continue
+			data_list[2] = self.__sarcasm
+			self.__dataframe.loc[len(self.__dataframe)] = data_list
+
+		print("[+] Dataframe completed")
+
+
+	def get_dataframe(self):
+		return self.__dataframe
