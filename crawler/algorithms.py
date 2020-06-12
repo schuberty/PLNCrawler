@@ -9,11 +9,10 @@ class Crawler:
 	"""
 	"""
 	__header = {'user-agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0"}
-	def __init__(self, url, sarcasm, as_archived=False, file_name=""):
+	def __init__(self, url, sarcasm, as_archived=False):
 		self.__url = url
 		self.__sarcasm = sarcasm
 		self.__as_archived = as_archived
-		self.__file_name = file_name
 
 		self.__htmls = []
 		self.__pages = None
@@ -134,7 +133,7 @@ class Crawler:
 		print("[+] Total of {0} raw data collected".format(len(self.__raw_data)))
 
 
-	def set_data_frame(self, re_link, re_title, rm_start, rm_end, url_prefix=""):
+	def set_data_frame(self, re_link, re_title, rm_start, rm_end, url_prefix=0):
 		"""Find a specific data of links and title information from a list of
 		HTML specific data.
 
@@ -154,6 +153,9 @@ class Crawler:
 			A substring to add in the beginning of the link founded by the re_link;
 			It's only used if the website URL is different from the original used in
 			the crawling.
+		url_prefix int, default 0
+			If there's anything to add in the begging of the url string to change in
+			the columns of "link" in the dataset.
 		"""
 		find_link = re.compile(re_link)
 		find_title = re.compile(re_title)
@@ -161,7 +163,7 @@ class Crawler:
 		for data in self.__raw_data:
 			data_list = [[],[],[],[]]
 			for tmp in find_link.finditer(data):
-				data_list[0] = url_prefix + data[tmp.start()+rm_start[0]:tmp.end()+rm_end[0]]
+				data_list[0] = self.__url[:url_prefix] + data[tmp.start()+rm_start[0]:tmp.end()+rm_end[0]]
 			for tmp in find_title.finditer(data):
 				data_list[1] = data[tmp.start()+rm_start[1]:tmp.end()+rm_end[1]]
 			if data_list[1] == "" or data_list[3] == "":
