@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# JSONs from crawler
-JSONs/
+# Datasets from crawler
+datasets/
