@@ -1,0 +1,110 @@
+{
+    "sensacionalista": [
+        {
+            "url": "https://www.sensacionalista.com.br/pais/page/",
+            "sarcasm": true,
+            "as_archived": false
+        },
+        {
+            "html_class": "last",
+            "re_string": "title=\"[^\"]*",
+            "start": 7,
+            "end": 0,
+            "element": "a",
+            "shorter": 0
+        },
+        {
+            "html_class": "td_module_8 td_module_wrap",
+            "re_string": "<a[^<]*</a>",
+            "element": "div"
+        },
+        {
+            "re_link": "href=\\\"[^\\\"]*",
+            "re_title": "title=\\\"[^\\\"]*",
+            "rm_start": [6, 8],
+            "rm_end": [0, 0],
+            "url_prefix": 0
+        }
+    ],
+    "piauiherald": [
+        {
+            "url": "https://piaui.folha.uol.com.br/herald/",
+            "sarcasm": true,
+            "as_archived": true
+        },
+        {
+            "html_class": "tab-btn",
+            "re_string": "data-tab=\"arquivo_\\d{4}\">",
+            "start": 18,
+            "end": 2,
+            "element": "li",
+            "shorter": 7
+        },
+        {
+            "html_class": "bloco size-2",
+            "re_string": "<a href=[^>]*>\\s<h2[^<]*",
+            "element": "div"
+        },
+        {
+            "re_link": "<a href=\\\"[^\\\"]*\\\">",
+            "re_title": "<h2 class=\\\"bloco-title\\\">\\s*.*",
+            "rm_start": [9, 26],
+            "rm_end": [2, 0],
+            "url_prefix": 0
+        }
+    ],
+    "huffpostbrasil": [
+        {
+            "url": "https://www.huffpostbrasil.com/noticias/",
+            "sarcasm": false,
+            "as_archived": false
+        },
+        {
+            "html_class": "pagination__link",
+            "re_string": "href=\\\"/noticias/\\d*/\\\"",
+            "start": 16,
+            "end": 2,
+            "element": "a",
+            "shorter": 0
+        },
+        {
+            "html_class": "apage-rail-cards",
+            "re_string": "<a class=\\\"[^<]*</a>",
+            "element": "div"
+        },
+        {
+            "re_link": "href=\\\"[^\\\"]*\\\"",
+            "re_title": "target=\\\"_self\\\">[^<]*<",
+            "rm_start": [7, 15],
+            "rm_end": [1, 1],
+            "url_prefix": 9
+        }
+    ],
+    "nexojornal": [
+        {
+            "url": "https://www.nexojornal.com.br/tema/Sociedade?pagina=",
+            "sarcasm": false,
+            "as_archived": false
+        },
+        {
+            "html_class": "Pagination__link___1VkYg",
+            "re_string": ">\\d{3}</a>",
+            "start": 1,
+            "end": 4,
+            "element": "a",
+            "shorter": 0
+        },
+        {
+            "html_class": "Teaser__title-dark___1HEzZ",
+            "re_string": "<a alt=\\\"[^>]*>",
+            "element": "h4"
+        },
+        {
+            "re_link": "href=\\\"[^\\\"]*\\\"",
+            "re_title": "title=\\\"[^\\\"]*\\\">",
+            "rm_start": [6, 7],
+            "rm_end": [1, 2],
+            "url_prefix": 23
+        }
+    ]
+}
