@@ -6,19 +6,16 @@
         },
         {
             "html_class": "last",
-            "re_string": "title=\"[^\"]*",
-            "start": 7,
-            "end": 0
+            "regex": "title=\"[^\"]*",
+            "remove": [7,0]
         },
         {
             "html_class": "td_module_8 td_module_wrap",
-            "re_string": "<a[^<]*</a>"
+            "regex": "<a[^<]*</a>"
         },
         {
-            "re_link": "href=\\\"[^\\\"]*",
-            "re_title": "title=\\\"[^\\\"]*",
-            "rm_start": [6, 8],
-            "rm_end": [0, 0]
+            "regex": ["href=\\\"[^\\\"]*", "title=\\\"[^\\\"]*"],
+            "remove": [[6,8], [0,0]]
         }
     ],
     "piauiherald": [
@@ -29,21 +26,18 @@
         },
         {
             "html_class": "tab-btn",
-            "re_string": "data-tab=\"arquivo_\\d{4}\">",
-            "start": 18,
-            "end": 2,
+            "regex": "data-tab=\"arquivo_\\d{4}\">",
+            "remove": [18, 2],
             "element": "li",
             "shorter": 7
         },
         {
             "html_class": "bloco size-2",
-            "re_string": "<a href=[^>]*>\\s<h2[^<]*"
+            "regex": "<a href=[^>]*>\\s<h2[^<]*"
         },
         {
-            "re_link": "<a href=\\\"[^\\\"]*\\\">",
-            "re_title": "<h2 class=\\\"bloco-title\\\">\\s*.*",
-            "rm_start": [9, 26],
-            "rm_end": [2, 0]
+            "regex": ["<a href=\\\"[^\\\"]*\\\">", "<h2 class=\\\"bloco-title\\\">\\s*.*"],
+            "remove": [[9,26], [2,0]]
         }
     ],
     "huffpostbrasil": [
@@ -53,19 +47,16 @@
         },
         {
             "html_class": "pagination__link",
-            "re_string": "href=\\\"/noticias/\\d*/\\\"",
-            "start": 16,
-            "end": 2
+            "regex": "href=\\\"/noticias/\\d*/\\\"",
+            "remove": [16,2]
         },
         {
             "html_class": "apage-rail-cards",
-            "re_string": "<a class=\\\"[^<]*</a>"
+            "regex": "<a class=\\\"[^<]*</a>"
         },
         {
-            "re_link": "href=\\\"[^\\\"]*\\\"",
-            "re_title": "target=\\\"_self\\\">[^<]*<",
-            "rm_start": [7, 15],
-            "rm_end": [1, 1],
+            "regex": ["href=\\\"[^\\\"]*\\\"", "target=\\\"_self\\\">[^<]*<"],
+            "remove": [[7,15], [1,1]],
             "url_prefix": 9
         }
     ],
@@ -76,20 +67,17 @@
         },
         {
             "html_class": "Pagination__link___1VkYg",
-            "re_string": ">\\d{3}</a>",
-            "start": 1,
-            "end": 4
+            "regex": ">\\d{3}</a>",
+            "remove": [1,4]
         },
         {
             "html_class": "Teaser__title-dark___1HEzZ",
-            "re_string": "<a alt=\\\"[^>]*>",
+            "regex": "<a alt=\\\"[^>]*>",
             "element": "h4"
         },
         {
-            "re_link": "href=\\\"[^\\\"]*\\\"",
-            "re_title": "title=\\\"[^\\\"]*\\\">",
-            "rm_start": [6, 7],
-            "rm_end": [1, 2],
+            "regex": ["href=\\\"[^\\\"]*\\\"", "title=\\\"[^\\\"]*\\\">"],
+            "remove": [[6,7], [1,2]],
             "url_prefix": 23
         }
     ]
