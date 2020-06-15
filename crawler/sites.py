@@ -7,8 +7,15 @@ from crawler.algorithms import Crawler
 dir_path = str(Path().absolute()) + sep
 
 class Sites():
+
+    datasets_dir = dir_path + sep + "datasets" + sep 
+
     def __init__(self):
         self.__sites = []
+
+        if not Path(self.datasets_dir).is_dir():
+            Path(self.datasets_dir).mkdir(exist_ok=True)
+
         for site in self.get_json_file():
             self.__sites.append(Site(site[0],site[1]))
 
@@ -23,14 +30,6 @@ class Sites():
 
         return sites
 
-    
-    def print_sites(self):
-        for item in self.__sites:
-            print(item.get_name(), end='\n' + '-'*40 + '\n')
-            for arg in item.get_args():
-                print(arg)
-            print()
-
 
 class Site():
     def __init__(self, name, args):
@@ -42,14 +41,14 @@ class Site():
         self.process()
 
         self.__crawler.get_dataframe().to_json(
-            dir_path + self.__name + ".json",
+            Sites.datasets_dir + self.__name + ".json",
             orient = "records",
             lines = True,
             force_ascii = False
         )
     
     def process(self):
-        self.__crawler.set_pages(**self.__args[1])
+        self.__crawler.set_requests(**self.__args[1])
         self.__crawler.set_raw_data(**self.__args[2])
         self.__crawler.set_data_frame(**self.__args[3])
 
