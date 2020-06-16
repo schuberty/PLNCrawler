@@ -10,12 +10,13 @@
             "remove": [7,0]
         },
         {
-            "html_class": "td_module_8 td_module_wrap",
-            "regex": "<a[^<]*</a>"
-        },
-        {
+            "raw_args":
+            {
+                "html_class": "td_module_8 td_module_wrap",
+                "regex": "<a[^<]*</a>"
+            },
             "regex": ["href=\\\"[^\\\"]*", "title=\\\"[^\\\"]*"],
-            "remove": [[6,8], [0,0]]
+            "remove": [[6,0], [7,0]]
         }
     ],
     "piauiherald": [
@@ -32,12 +33,13 @@
             "shorter": 7
         },
         {
-            "html_class": "bloco size-2",
-            "regex": "<a href=[^>]*>\\s<h2[^<]*"
-        },
-        {
+            "raw_args":
+            {
+                "html_class": "bloco size-2",
+                "regex": "<a href=[^>]*>\\s<h2[^<]*"
+            },
             "regex": ["<a href=\\\"[^\\\"]*\\\">", "<h2 class=\\\"bloco-title\\\">\\s*.*"],
-            "remove": [[9,26], [2,0]]
+            "remove": [[9,2], [26,0]]
         }
     ],
     "huffpostbrasil": [
@@ -51,13 +53,14 @@
             "remove": [16,2]
         },
         {
-            "html_class": "apage-rail-cards",
-            "regex": "<a class=\\\"[^<]*</a>"
-        },
-        {
+            "raw_args":
+            {
+                "html_class": "apage-rail-cards",
+                "regex": "<a class=\\\"[^<]*</a>"
+            },
             "regex": ["href=\\\"[^\\\"]*\\\"", "target=\\\"_self\\\">[^<]*<"],
-            "remove": [[7,15], [1,1]],
-            "url_prefix": 9
+            "remove": [[7,1], [15,1]],
+            "url_prefix": 31
         }
     ],
     "nexojornal": [
@@ -71,14 +74,15 @@
             "remove": [1,4]
         },
         {
-            "html_class": "Teaser__title-dark___1HEzZ",
-            "regex": "<a alt=\\\"[^>]*>",
-            "element": "h4"
-        },
-        {
+            "raw_args":
+            {
+                "html_class": "Teaser__title-dark___1HEzZ",
+                "regex": "<a alt=\\\"[^>]*>",
+                "element": "h4"
+            },
             "regex": ["href=\\\"[^\\\"]*\\\"", "title=\\\"[^\\\"]*\\\">"],
-            "remove": [[6,7], [1,2]],
-            "url_prefix": 23
+            "remove": [[6,1], [7,2]],
+            "url_prefix": 30
         }
     ]
 }
