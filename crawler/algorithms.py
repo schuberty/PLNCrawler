@@ -10,15 +10,13 @@ from crawler.requester import Requester
 class Crawler:
 	"""
 	"""
-	__header = {'user-agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0"}
 	def __init__(self, url, sarcasm, as_archived=False):
 		self.__url = url
 		self.__sarcasm = sarcasm
 		self.__as_archived = as_archived
 
+		self.__data = list()
 		self.__requests = list()
-		self.__raw_data = list()
-		self.__dataframe = pd.DataFrame(columns=["is_sarcastic","article_link","headline","text"])
 
 
 	def set_requests(self, html_class, regex, remove, element="a", shorter=0):
@@ -61,10 +59,10 @@ class Crawler:
 			for page in range(1, pages):
 				urls.append(self.__url + str(page))
 
-		self.__requests = Requester(urls, 10).get_requests()
+		self.__requests = Requester(urls, list_size=1).get_requests()
 
 
-	def set_raw_data(self, html_class, regex, element="div"):
+	def get_raw_data(self, html_class, regex, element="div"):
 		"""Find some specific part of an HTML class.
 
 		Parameters
@@ -78,16 +76,18 @@ class Crawler:
 		"""
 		find_element = re.compile(regex)
 
+		raw_data = list()
+
 		for request in self.__requests:
 			bs = BeautifulSoup(request.text, "html.parser")
 			raw = str(bs.find_all(element, class_=html_class))
 			for text in find_element.finditer(raw):
-				self.__raw_data.append(raw[text.start():text.end()])
+				raw_data.append(raw[text.start():text.end()])
 
-		print("[+] Total of {0:04d} raw data collected".format(len(self.__raw_data)))
+		print("[+] Total of {0:04d} raw data collected".format(len(raw_data)))
+		return raw_data
 
-
-	def set_data_frame(self, regex, remove, url_prefix=0):
+	def set_data(self, raw_args, regex, remove, url_prefix=0):
 		"""Find a specific data of links and title information from a list of
 		HTML specific data.
 
@@ -113,21 +113,26 @@ class Crawler:
 		"""
 		find_link = re.compile(regex[0])
 		find_title = re.compile(regex[1])
+		# find_text = re.compile(regex[2])
 
-		for data in self.__raw_data:
-			data_list = [[],[],[],[]]
-			data_list[0] = self.__sarcasm
-			for tmp in find_link.finditer(data):
-				data_list[1] = self.__url[:url_prefix] + data[tmp.start()+remove[0][0]:tmp.end()+remove[0][1]]
-			for tmp in find_title.finditer(data):
-				data_list[2] = data[tmp.start()+remove[1][0]:tmp.end()+remove[1][1]]
-			if data_list[2] == "" or data_list[3] == "":
+		for raw in self.get_raw_data(**raw_args):
+			data = [None,None,None,None]
+			data[0] = self.__sarcasm
+			for tmp in find_link.finditer(raw):
+				data[1] = self.__url[:url_prefix] + raw[tmp.start()+remove[0][0]:tmp.end()-remove[0][1]]
+			for tmp in find_title.finditer(raw):
+				data[2] = raw[tmp.start()+remove[1][0]:tmp.end()-remove[1][1]]
+			if data[2] == [""]:
 				continue
-			data_list[3] = ""
-			self.__dataframe.loc[len(self.__dataframe)] = data_list
+			# self.__dataframe.loc[len(self.__dataframe)] = data_list
+			self.__data.append(data)
+
+		# requests = Requester(list(data_list[1]), list_size=100)
+
+		# for data in data_list:
+			# self.__dataframe.loc[len(self.__dataframe)] = data
 
 		print("[+] Dataframe completed")
 
-
-	def get_dataframe(self):
-		return self.__dataframe
+	def get_data(self):
+		return self.__data
