@@ -16,30 +16,8 @@
                 "regex": "<a[^<]*</a>"
             },
             "regex": ["href=\\\"[^\\\"]*", "title=\\\"[^\\\"]*"],
-            "remove": [[6,0], [7,0]]
-        }
-    ],
-    "piauiherald": [
-        {
-            "url": "https://piaui.folha.uol.com.br/herald/",
-            "sarcasm": true,
-            "as_archived": true
-        },
-        {
-            "html_class": "tab-btn",
-            "regex": "data-tab=\"arquivo_\\d{4}\">",
-            "remove": [18, 2],
-            "element": "li",
-            "shorter": 7
-        },
-        {
-            "raw_args":
-            {
-                "html_class": "bloco size-2",
-                "regex": "<a href=[^>]*>\\s<h2[^<]*"
-            },
-            "regex": ["<a href=\\\"[^\\\"]*\\\">", "<h2 class=\\\"bloco-title\\\">\\s*.*"],
-            "remove": [[9,2], [26,0]]
+            "remove": [[6,0], [7,0]],
+            "html_options": ["div", "p402_premium"]
         }
     ],
     "huffpostbrasil": [
@@ -60,6 +38,7 @@
             },
             "regex": ["href=\\\"[^\\\"]*\\\"", "target=\\\"_self\\\">[^<]*<"],
             "remove": [[7,1], [15,1]],
+            "html_options": ["div", "content-list-component text"],
             "url_prefix": 31
         }
     ],
@@ -82,7 +61,32 @@
             },
             "regex": ["href=\\\"[^\\\"]*\\\"", "title=\\\"[^\\\"]*\\\">"],
             "remove": [[6,1], [7,2]],
+            "html_options": ["div", "Default__text-area___38Dm5"],
             "url_prefix": 30
+        }
+    ],
+    "piauiherald": [
+        {
+            "url": "https://piaui.folha.uol.com.br/herald/",
+            "sarcasm": true,
+            "as_archived": true
+        },
+        {
+            "html_class": "tab-btn",
+            "regex": "data-tab=\"arquivo_\\d{4}\">",
+            "remove": [18, 2],
+            "element": "li",
+            "shorter": 7
+        },
+        {
+            "raw_args":
+            {
+                "html_class": "bloco size-2",
+                "regex": "<a href=[^>]*>\\s<h2[^<]*"
+            },
+            "regex": ["<a href=\\\"[^\\\"]*\\\">", "<h2 class=\\\"bloco-title\\\">\\s*.*"],
+            "remove": [[9,2], [26,0]],
+            "html_options": ["div", "post-inner"]
         }
     ]
 }
