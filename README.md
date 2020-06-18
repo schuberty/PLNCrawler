@@ -4,7 +4,7 @@ English | [Portuguese](./README.pt-BR.md)
 
 <div align="center">
 
-A web crawler for datasets creationa
+A web crawler for datasets creation
 
 ![Python version][python-src]
 ![Latest commit][commit-src]
@@ -33,7 +33,7 @@ After having the dependencies and the repository, execute:
 python PLNCrawler.py 
 ```
 
-After that, all information will be made available after the execution.
+After that, all the websites in [sites.json](sites.json) will be crawled and saved.
 
 ---
 ###### **README in development**

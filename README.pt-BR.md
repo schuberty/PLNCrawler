@@ -32,7 +32,7 @@ Depois de ter as dependências e o repositório, execute:
 python PLNCrawler.py
 ```
 
-A partir disto, as informações necessárias serão disponibilizadas após a execução.
+A partir disto, todos os websites em sites.json serão processados e salvos.
 
 ---
 ###### **README em desenvolvimento**
