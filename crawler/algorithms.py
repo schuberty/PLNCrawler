@@ -3,7 +3,6 @@ import re
 import requests
 
 from bs4 import BeautifulSoup
-from time import sleep,localtime
 
 from crawler.requester import Requester
 
@@ -20,7 +19,8 @@ class Crawler:
 
 
 	def set_requests(self, html_class, regex, remove, element="a", shorter=0):
-		"""Find the last page of a website.
+		""" NOT UPDATED YET
+		Find the last page of a website.
 		e.g. "Pages 1, 2, ..., 34, 35" <- Last page here is 35;
 		Or find the strings rellated to the archived data.
 		e.g. "News by year: 2020, 2019, ...,2005" <- Here is a list[2020, ..., 2005].
@@ -59,11 +59,12 @@ class Crawler:
 			for page in range(1, pages):
 				urls.append(self.__url + str(page))
 
-		self.__requests = Requester(urls, list_size=1).get_requests()
+		self.__requests = Requester(urls, num_threads=24).get_requests()
 
 
 	def get_raw_data(self, html_class, regex, element="div"):
-		"""Find some specific part of an HTML class.
+		""" NOT UPDATED YET
+		Find some specific part of an HTML class.
 
 		Parameters
 		----------
@@ -87,8 +88,9 @@ class Crawler:
 		print("[+] Total of {0:04d} raw data collected".format(len(raw_data)))
 		return raw_data
 
-	def set_data(self, raw_args, regex, remove, url_prefix=0):
-		"""Find a specific data of links and title information from a list of
+	def set_data(self, raw_args, regex, remove, html_options, url_prefix=0):
+		"""	NOT UPDATED YET
+		Find a specific data of links and title information from a list of
 		HTML specific data.
 
 		Parameters
@@ -113,24 +115,42 @@ class Crawler:
 		"""
 		find_link = re.compile(regex[0])
 		find_title = re.compile(regex[1])
-		# find_text = re.compile(regex[2])
+		find_text = re.compile(r"<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
+		urls = list()
 
 		for raw in self.get_raw_data(**raw_args):
 			data = [None,None,None,None]
 			data[0] = self.__sarcasm
 			for tmp in find_link.finditer(raw):
 				data[1] = self.__url[:url_prefix] + raw[tmp.start()+remove[0][0]:tmp.end()-remove[0][1]]
+			urls.append(data[1])
 			for tmp in find_title.finditer(raw):
 				data[2] = raw[tmp.start()+remove[1][0]:tmp.end()-remove[1][1]]
 			if data[2] == [""]:
 				continue
-			# self.__dataframe.loc[len(self.__dataframe)] = data_list
 			self.__data.append(data)
 
-		# requests = Requester(list(data_list[1]), list_size=100)
-
-		# for data in data_list:
-			# self.__dataframe.loc[len(self.__dataframe)] = data
+		progress = 0
+		requests = Requester(urls, num_threads = 24).get_requests()
+		print("[+] {0:03d}/{1:03d} data crawled".format(progress,len(requests)), end='\r')
+		for request in requests:
+			if request.url != urls[progress]:
+				progress += 1
+				continue
+			bs = BeautifulSoup(request.text, "html.parser")
+			text = str(bs.find_all(html_options[0], html_options[1]))
+			bs = BeautifulSoup(text, "html.parser")
+			text = str(bs.find_all("p"))
+			indexs = list()
+			for t in find_text.finditer(text):
+				indexs.append([t.start(),t.end()])
+			indexs.reverse()
+			for i in indexs:
+				text = text.replace(text[i[0]:i[1]], '')
+			self.__data[progress][3] = text
+			progress += 1
+			print("[+] {0:03d}/{1:03d} data crawled".format(progress,len(requests)), end='\r')
+		print()
 
 		print("[+] Dataframe completed")
 
