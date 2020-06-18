@@ -1,3 +1,5 @@
+import pandas as pd
+
 from json import load as load_json
 from pathlib import Path
 from os import sep
@@ -11,7 +13,7 @@ class Sites():
     datasets_dir = dir_path + sep + "datasets" + sep 
 
     def __init__(self):
-        self.__sites = []
+        self.__sites = list()
 
         if not Path(self.datasets_dir).is_dir():
             Path(self.datasets_dir).mkdir(exist_ok=True)
@@ -37,20 +39,26 @@ class Site():
         self.__args = args
 
         self.__crawler = Crawler(**self.__args[0])
-
         self.process()
+        self.__dataframe = pd.DataFrame(self.__crawler.get_data(), columns=["is_sarcastic","article_link","headline","text"])
 
-        self.__crawler.get_dataframe().to_json(
-            Sites.datasets_dir + self.__name + ".json",
-            orient = "records",
-            lines = True,
-            force_ascii = False
+
+        self.__dataframe.to_csv(
+            Sites.datasets_dir + self.__name + ".csv",
+            sep = ';',
+            index = False,
+            encoding = "utf-8-sig"
         )
+        # self.__dataframe.to_json(
+        #     Sites.datasets_dir + self.__name + ".json",
+        #     orient = "records",
+        #     lines = True,
+        #     force_ascii = False
+        # )
     
     def process(self):
         self.__crawler.set_requests(**self.__args[1])
-        self.__crawler.set_raw_data(**self.__args[2])
-        self.__crawler.set_data_frame(**self.__args[3])
+        self.__crawler.set_data(**self.__args[2])
 
     def get_name(self):
         return self.__name
