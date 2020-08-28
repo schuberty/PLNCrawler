@@ -21,13 +21,14 @@ class Requester:
 
 
     def __set_requests(self):
-        # Split the list of URLs to make the requests into multiple threads
         indexer = 0
         threads = list()
+       
+        # Split the list of URLs to make the requests into multiple threads
         for urls in self.__urls_list:
             thread = Thread(
                     target=self.__set_request_list,
-                    args=(urls, indexer)
+                    args=(indexer, urls)
                     )
             thread.start()
             indexer += 1
@@ -49,28 +50,29 @@ class Requester:
 
 
 
-    def __set_request_list(self, urls, index):
-        requests = (index, list())
+    def __set_request_list(self, index, urls):
+        requests = [index, list()]
 
         for url in urls:
             request = self.get_one_request(url)
             if request == None:
                 continue
             requests[1].append(request)
-            self.__progress()
+            self.__print_progress()
         self.__requests.append(requests)
 
 
-    def __progress(self):
+    def __print_progress(self):
         self.__progress += 1
         print("[+] {0:05d}/{1:05d} requests completed.".format(
-                        self.__progress[0],
+                        self.__progress,
                         self.__len_urls), end='\r')
 
 
     @staticmethod
-    def get_one_request(url):
+    def get_one_request(url, force=False):
         timeout = None
+        attempts = 10
 
         while timeout != False:
             try:
@@ -78,8 +80,14 @@ class Requester:
                 timeout = False
             except (requests.ConnectionError,requests.ReadTimeout):
                 timeout = True
+                if not force:
+                    attempts -= 1
+                if attempts == 0:
+                    return None
                 sleep(5)
             except:
+                if force:
+                    continue
                 return None
 
         return request

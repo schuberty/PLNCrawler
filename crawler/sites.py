@@ -42,19 +42,27 @@ class Site():
         self.process()
         self.__dataframe = pd.DataFrame(self.__crawler.get_data(), columns=["is_sarcastic","article_link","headline","text"])
 
+        # data = self.__crawler.get_data()
+        # file = Sites.datasets_dir + "texto_" + self.__name + ".txt"
+        # f = open(file, "w+", encoding="utf-8")
+        # for d in data:
+        #     if(d[3] == None):
+        #         continue
+        #     f.write(d[3])
+        # f.close()
 
-        self.__dataframe.to_csv(
-            Sites.datasets_dir + self.__name + ".csv",
-            sep = ';',
-            index = False,
-            encoding = "utf-8-sig"
-        )
-        # self.__dataframe.to_json(
-        #     Sites.datasets_dir + self.__name + ".json",
-        #     orient = "records",
-        #     lines = True,
-        #     force_ascii = False
+        # self.__dataframe.to_csv(
+        #     Sites.datasets_dir + self.__name + ".csv",
+        #     sep = '|',
+        #     index = False,
+        #     encoding = "utf-8-sig"
         # )
+        self.__dataframe.to_json(
+            Sites.datasets_dir + self.__name + ".json",
+            orient = "records",
+            lines = True,
+            force_ascii = False
+        )
     
     def process(self):
         self.__crawler.set_requests(**self.__args[1])

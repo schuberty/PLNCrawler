@@ -3,7 +3,7 @@ import re
 import requests
 
 from bs4 import BeautifulSoup
-
+from time import sleep
 from crawler.requester import Requester
 
 class Crawler:
@@ -46,7 +46,7 @@ class Crawler:
 		find_pages = re.compile(regex)
 		urls = list()
 
-		html = Requester.get_one_request(self.__url + ("1", "")[self.__as_archived])
+		html = Requester.get_one_request(self.__url + ("1", "")[self.__as_archived], force=True)
 		bs = BeautifulSoup(html.text, "html.parser")
 		element = str(bs.find_all(element, class_=html_class))
 
@@ -58,7 +58,6 @@ class Crawler:
 				pages = int(element[page.start()+remove[0]:page.end()-remove[1]]) + 1
 			for page in range(1, pages):
 				urls.append(self.__url + str(page))
-
 		self.__requests = Requester(urls, num_threads=24).get_requests()
 
 
@@ -76,7 +75,6 @@ class Crawler:
 			Element of the HTML to be founded.
 		"""
 		find_element = re.compile(regex)
-
 		raw_data = list()
 
 		for request in self.__requests:
@@ -115,7 +113,8 @@ class Crawler:
 		"""
 		find_link = re.compile(regex[0])
 		find_title = re.compile(regex[1])
-		find_text = re.compile(r"<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
+		find_text = re.compile(r"<.*?>")
+		# find_text = re.compile(r"<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
 		urls = list()
 
 		for raw in self.get_raw_data(**raw_args):
@@ -128,29 +127,32 @@ class Crawler:
 				data[2] = raw[tmp.start()+remove[1][0]:tmp.end()-remove[1][1]]
 			if data[2] == [""]:
 				continue
+			data[3] = ""
 			self.__data.append(data)
 
-		progress = 0
-		requests = Requester(urls, num_threads = 24).get_requests()
-		print("[+] {0:03d}/{1:03d} data crawled".format(progress,len(requests)), end='\r')
-		for request in requests:
-			if request.url != urls[progress]:
-				progress += 1
-				continue
-			bs = BeautifulSoup(request.text, "html.parser")
-			text = str(bs.find_all(html_options[0], html_options[1]))
-			bs = BeautifulSoup(text, "html.parser")
-			text = str(bs.find_all("p"))
-			indexs = list()
-			for t in find_text.finditer(text):
-				indexs.append([t.start(),t.end()])
-			indexs.reverse()
-			for i in indexs:
-				text = text.replace(text[i[0]:i[1]], '')
-			self.__data[progress][3] = text
-			progress += 1
-			print("[+] {0:03d}/{1:03d} data crawled".format(progress,len(requests)), end='\r')
-		print()
+		# progress = 0
+		# requests = Requester(urls, num_threads = 64).get_requests()
+		# print("[+] {0:03d}/{1:03d} data crawled".format(progress,len(requests)), end='\r')
+		# for request in requests:
+		# 	if request.url != urls[progress]:
+		# 		progress += 1
+		# 		continue
+		# 	bs = BeautifulSoup(request.text, "html.parser")
+		# 	text = str(bs.find_all(html_options[0], html_options[1]))
+		# 	bs = BeautifulSoup(text, "html.parser")
+		# 	text = str(bs.find_all("p"))
+		# 	indexs = list()
+		# 	for t in find_text.finditer(text):
+		# 		indexs.append([t.start(),t.end()])
+		# 	indexs.reverse()
+		# 	text = list(text)
+		# 	for i in indexs:
+		# 		for r in range(i[1], i[0]-1, -1):
+		# 			text[r] = ''
+		# 	self.__data[progress][3] = ''.join(text)
+		# 	progress += 1
+		# 	print("[+] {0:03d}/{1:03d} data crawled".format(progress,len(requests)), end='\r')
+		# print()
 
 		print("[+] Dataframe completed")
 
