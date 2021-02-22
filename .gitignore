@@ -130,3 +130,6 @@ dmypy.json
 
 # Datasets from crawler
 #datasets/
+
+# Local Jupyter Notebooks for Test
+notebooks/
