@@ -133,3 +133,6 @@ dmypy.json
 
 # Local Jupyter Notebooks for Test
 notebooks/
+
+# VSCode files
+.vscode/
