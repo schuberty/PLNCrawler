@@ -4,7 +4,7 @@ from json import load as load_json
 from pathlib import Path
 from os import sep
 
-from crawler.algorithms import Crawler
+from .algorithms import Crawler
 
 dir_path = str(Path().absolute()) + sep
 

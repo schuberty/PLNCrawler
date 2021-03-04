@@ -4,7 +4,7 @@ import requests
 
 from bs4 import BeautifulSoup
 from time import sleep
-from crawler.requester import Requester
+from .requester import Requester
 
 class Crawler:
 	"""

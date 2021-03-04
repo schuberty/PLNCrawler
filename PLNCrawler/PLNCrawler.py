@@ -10,6 +10,5 @@ if version_info[0] < 3 and version_info[1] < 8:
 def _main():
 	Sites()
 
-
 if __name__ == '__main__':
 	_main()
