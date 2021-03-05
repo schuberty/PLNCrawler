@@ -49,7 +49,6 @@ class Requester:
                 self.__requests.append(request)
 
 
-
     def __set_request_list(self, index, urls):
         requests = [index, list()]
 
