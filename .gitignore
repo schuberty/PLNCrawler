@@ -136,3 +136,6 @@ notebooks/
 
 # VSCode files
 .vscode/
+
+*.test.json
+*.ipynb
