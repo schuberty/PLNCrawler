@@ -6,8 +6,8 @@
 
 Um web crawler para criação de datasets
 
-![Python version][python-src]
-![Latest commit][commit-src]
+[![Python version][python-src]][python-href]
+[![Latest commit][commit-src]][commit-href]
 [![License][license-src]][license-href]
 
 </div>
@@ -38,10 +38,10 @@ Clone ou faça o download do repositório.
 https://github.com/schuberty/PLNCrawler.git
 ```
 
-Estando no diretório em que o repositório foi importado, instale um novo ambiente virtual com as dependencias corretas a partir do arquivo [Pipfile](Pipfile) com o seguinte comando:
+Estando no diretório em que o repositório foi importado, instale um novo ambiente virtual com as dependências corretas a partir do arquivo [Pipfile](Pipfile) usando o seguinte comando:
 
 ```sh
-> pipenv install --dev
+> pipenv install
 ```
 
 Após, ative o *Pipenv shell*.
@@ -60,6 +60,8 @@ Isto irá gerar um novo subprocesso shell, o qual pode ser desativado usando:
 ###### **README em desenvolvimento** ######
 
 [python-src]: https://img.shields.io/badge/python-3.9-green.svg
+[python-href]: https://www.python.org/downloads/release/python-390/
 [commit-src]: https://badgen.net/github/last-commit/schuberty/PLNCrawler
+[commit-href]: https://github.com/schuberty/PLNCrawler
 [license-src]: https://badgen.net/github/license/schuberty/PLNCrawler
 [license-href]: LICENSE.md
