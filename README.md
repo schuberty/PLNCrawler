@@ -28,31 +28,31 @@ To make good use of this repository it is recommended to use the [pipenv](https:
 
 The following installation tutorial will be based on [pipenv](https://pypi.org/project/pipenv/), if you don't have it, install it with [pip](https://pip.pypa.io/en/stable/installing/).
 
-```properties
+```sh
 > pip install pipenv
 ```
 
 Clone or download the repository.
 
-```sh
+```url
 https://github.com/schuberty/PLNCrawler.git
 ```
 
 Being in the directory where the repository was imported, install a new virtual environment with the correct dependencies from the Pipfile file with the following command:
 
-```properties
+```sh
 > pipenv install --dev
 ```
 
 Next, activate the Pipenv shell:
 
-```properties
+```sh
 > pipenv shell
 ```
 
 This will spawn a new shell subprocess, which can be deactivated by using:
 
-```properties
+```sh
 (env) > exit
 ```
 
