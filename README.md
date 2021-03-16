@@ -44,7 +44,7 @@ Being in the directory where the repository was imported, install a new virtual 
 > pipenv install --dev
 ```
 
-Next, activate the Pipenv shell:
+Next, activate the Pipenv shell.
 
 ```sh
 > pipenv shell

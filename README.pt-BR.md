@@ -44,7 +44,7 @@ Estando no diretório em que o repositório foi importado, instale um novo ambie
 > pipenv install --dev
 ```
 
-Após, ative o *Pipenv shell*:
+Após, ative o *Pipenv shell*.
 
 ```sh
 > pipenv shell
