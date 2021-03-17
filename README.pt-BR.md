@@ -9,12 +9,13 @@ Um web crawler para criação de datasets
 [![Python version][python-src]][python-href]
 [![Latest commit][commit-src]][commit-href]
 [![License][license-src]][license-href]
+[![Article][article-src]][article-href]
 
 </div>
 
 PLNCrawler é um web crawler focado na **criação automatizada de datasets** a serem utilizados no processamento de linguagem natural. Os sites incluídos são [Sensacionalista](https://www.sensacionalista.com.br/pais/), [The piauí Herald](https://piaui.folha.uol.com.br/herald/) e [Estadão](https://politica.estadao.com.br/ultimas), tendo seus datasets disponíveis neste repositório na pasta [datasets](datasets/).
 
-> ##### **Sobre o artigo publicado com referência a este repositório** – Alguns dos websites utilizados anteriormente foram descontinuados por: 1. Nexo Jornal ter começado a pedir por inscrição para poder visualizar seu conteúdo e; 2. HuffPost Brasil parou de publicar conteúdo e todos as suas notíticas foram limitadas. Estes dois websites foram trocados pelo Estadão #####
+> ##### Sobre o artigo publicado com referência a este repositório – Alguns dos websites utilizados anteriormente foram descontinuados por: 1. Nexo Jornal ter começado a pedir por inscrição para poder visualizar seu conteúdo e; 2. HuffPost Brasil parou de publicar conteúdo e todos as suas notíticas foram limitadas. Estes dois websites foram trocados pelo Estadão #####
 
 ## Dependencias ##
 
@@ -61,7 +62,9 @@ Isto irá gerar um novo subprocesso shell, o qual pode ser desativado usando:
 
 [python-src]: https://img.shields.io/badge/python-3.9-green.svg
 [python-href]: https://www.python.org/downloads/release/python-390/
-[commit-src]: https://badgen.net/github/last-commit/schuberty/PLNCrawler
+[commit-src]: https://badgen.net/github/last-commit/schuberty/PLNCrawler?color=yellow
 [commit-href]: https://github.com/schuberty/PLNCrawler
-[license-src]: https://badgen.net/github/license/schuberty/PLNCrawler
+[license-src]: https://badgen.net/github/license/schuberty/PLNCrawler?color=orange
 [license-href]: LICENSE.md
+[article-src]: https://badgen.net/badge/article/ENIAC/red
+[article-href]: https://sol.sbc.org.br/index.php/eniac/article/view/12172
